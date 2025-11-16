@@ -5,7 +5,7 @@ Complete documentation (including GPT YAML configuration, workflow details, scri
 
 # 🧩 GPT Custom Configuration (YAML from MEGA-GPT)
 
-```yaml
+
 name: MEGA-GPT
 description: >
   A customized GPT optimized for MEGA software workflows, phylogenetic
@@ -20,7 +20,7 @@ capabilities:
   - megacc automation scripting
   - workflow debugging
   - reading PDF manuals and .docx FAQ files
-````
+
 
 ---
 
