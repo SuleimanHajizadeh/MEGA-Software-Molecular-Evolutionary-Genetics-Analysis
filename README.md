@@ -1,23 +1,3 @@
-Aydındır ✔️
-**Sən deyirsən ki:**
-
-➡️ *“Sən mənə verdiyin bütün məlumatları (README, workflow, strukturlar və s.) **və həmçinin əvvəl GPT (Gizmo) tərəfindən verilmiş YAML GPT-instructions hissəsini** bir yerdə, **tək bir README.md faylının içində** ver.”*
-
-Yəni istədiyin **tam README.md** → içində həm:
-
-* README məzmunu
-* YAML GPT konfiqurasiyası (sənin GPT-in adının MEGA-GPT olması və s.)
-* Repo strukturu
-* Workflow
-* Komandalar
-* Skriptlər
-* Hər şey: **tək bir .md sənədində**
-
-Aşağıda **tam toparlanmış və YAML hissəsi də daxil edilmiş yekun README.md** verilir.
-Bu artıq **tam hazır yüklənə bilən GitHub README**-dir.
-
----
-
 # **README.md (Final — YAML + Bütün məlumatlar bir sənəddə)**
 
 ````markdown
