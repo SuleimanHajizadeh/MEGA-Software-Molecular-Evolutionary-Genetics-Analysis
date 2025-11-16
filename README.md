@@ -1,4 +1,3 @@
-````markdown
 # MEGA-Software: Molecular Evolutionary Genetics Analysis  
 Complete documentation (including GPT YAML configuration, workflow details, scripts, repository structure, and MEGA usage).
 
