@@ -1,0 +1,4 @@
+!MRCA='demoLabel1' TaxonA=chimpanzee TaxonB=bonobo minTime=2.4 maxTime=3.2
+!NodeName='demoLabel2' minTime=8.2 maxTime=9.8;
+
+ 

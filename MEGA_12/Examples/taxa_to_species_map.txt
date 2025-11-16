@@ -1,0 +1,10 @@
+Homo_sapiens_PRF1=human
+Mus_musculus_PRF1=mouse
+Takifugu_rubripes_PRF1.2=puffer_fish
+Homo_sapiens_C6=human
+Mus_musculus_C6=mouse
+Anolis_carolinensis_C6=lizard
+Homo_sapiens_MPEG1=human
+Mus_musculus_MPEG1=mouse
+Anolis_carolinensis_MPEG1=lizard
+Takifugu_rubripes_MPEG1=puffer_fish

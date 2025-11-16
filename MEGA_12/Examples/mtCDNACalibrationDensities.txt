@@ -1,0 +1,4 @@
+!MRCA='demoLabel1' TaxonA='chimpanzee' TaxonB='bonobo' Distribution=normal mean=2.38000000 stddev=0.15000000 calibrationName='chimpanzee-bonobo-split';
+!MRCA='demoLabel2' TaxonA='chimpanzee' TaxonB='gorilla' Distribution=exponential offset=9.06000000 lambda=2.00000000 calibrationName='chimpanzee-gorilla-split';
+!MRCA='orangutan-sumatran' TaxonA='orangutan' TaxonB='sumatran' Distribution=uniform mintime=3.64000000 maxtime=5.96000000 calibrationName='orangutan-sumatran-split';
+!MRCA='homo_sapiens-chimp' TaxonA='chimpanzee' TaxonB='homo sapiens' Distribution=lognormal offset=4.80000000 mean=0.50000000 stddev=0.15000000 calibrationName='chimpanzee-homo sapiens-split';
