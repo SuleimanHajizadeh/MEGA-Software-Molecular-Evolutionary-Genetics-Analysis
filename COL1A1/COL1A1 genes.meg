@@ -1,0 +1,25 @@
+#mega
+!Title ;
+!Format DataType=DNA indel=- CodeTable=Standard;
+
+!Domain=Data property=Coding CodonStart=1;
+#Homo_sapiens_(Human)
+------------------------------------------------------------
+----------CAGGAGGCACGCGGAGTGTGAGGCCACGCATGAGCCGACGCTAACCCCCA
+CCCCAGCCGCAAAGAGTCTA
+
+#Mus_musculus_(House_mouse)
+CATGTCTAGGATCTAGACATGTTCAGCTTTGTGGACCTCCGGCTCCTGCTCCTCTTAGCG
+GCCACCGCCCCAGGAGGCACGCGGAGTGTGAGGCCACGCATGAGCCGACGCTAACCCCCA
+CCCCAGCCGCAAAGAGTCTA
+
+#Gallus_gallus_(Chicken)
+------------------------------------------------------------
+----------CAGGAGGCACGCGGAGTGTGAGGCCACGCATGAGCCGACGCTAACCCCCA
+CCCCAGCCGCAAAGAGTCTA
+
+#Canis_lupus_familiaris_(Dog)
+------------------------------------------------------------
+----------CAGGAGGCACGCGGAGTGTGAGGCCACGCATGAGCCGACGCTAACCCCCA
+CCCCAGCCGCAAAGAGTCTA
+
