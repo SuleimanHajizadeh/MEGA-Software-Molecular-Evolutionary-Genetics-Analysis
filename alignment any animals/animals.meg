@@ -1,0 +1,129 @@
+#MEGA
+!Title animals;
+!Format
+   DataType=Nucleotide
+   NSeqs=10 NSites=839
+   Identical=. Missing=? Indel=-;
+
+
+!Domain=Data;
+#Sequence_1                            
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- ---------- ---------- ---------
+#Homo_sapiens_9QB3_b                   
+---------G GGTTGCGGAG GGTGGGCCTG GG----AGGG GTGGTG---- ----GCCATT TT-------- ---------- 
+---------- -TTGTCT--- --------AA CCCTAACTGA GAAGGGCGTA GGC------- ---------- ---------- 
+---------- -------GCC GTGCTTTTGC TCCCC----- ---------- --GCGCG--- --CTGTTTTT CTCGCT---- 
+---------- -----GACTT TCAGCGGGCG GAAAAGCC-- ---------- -----TCGGC CTGCCGCCTT CCACCGTTCA 
+TT-------- ---------- ---------- ---------- --CTAGAGCA AACAA--AAA ATGTCA---- -------GCT 
+GCTGGCCCGT TCGCCCCTCC CGGGGACCT- ---------- GCGGCGGGTC GCCT------ ---GCCCAGC CCCCGAACCC 
+CGCCT----- ---------- ---------- ---------- ---------- ---GG----A GGCCGCGGTC GGCCCGGGGC 
+TTCTCCGGAG GCACCCACTG CCACCGCGAA GAGTTGGGCT CTGTCAGCCG C--------- ---------- -------GGG 
+TCTCTCGGGG GCGAGGGCGA GGTT------ -----CAGGC CTTTCAGGCC GCAGGAAGAG GAACGGAGCG AGTC------ 
+---------- --CCCGCGCG CGGCGCGATT CC-------- -----CTGAG CTGTG----- -GGACGTGCA CCCA---GGA 
+CTCGGCTCAC ACATGC---- ---------- ---------
+#Canis_lupus_familiaris_DN905699       
+----CCACGC GTCCGCCCTG ACCGTGCCAA GGGTAGAGCC GCGGCCTCGG CCGGTCAGCT CCCCCTCCGC CGCTTCGGGG 
+CCTGCGGGGT TCTGGCCTCG CGTCTCGGAA CCCTTCGGAG GGGGAGGCCG GAGGAGGCCG CGGCAGCTCC GGGAACTC-- 
+-------CGC CGGCCGAGCC GCCCCCGCGC CTCTC----- ---------- --GCTC---- --CTTCTTTT CTTTC----- 
+---------- -----TCTTC CCCCCGACAA CTGAAAACAA AACCCAGAAC ACCGGGGGAG CTTCCGTATC CTAAACCTTA 
+GGAAGTTCCC AGCGTTGC-- -TCGGGGTCT GCGGCCCGCT AACGGCCCCG CAGAA--TAG GTGCTG---- -------CCC 
+CGAGAT--GG ACGCGCCGCC CGCGAAGCTT GAGGTTCCGA GAGGCGAACC TCTTCCGCAG CCGCCTAAGT GACCGAGCCG 
+GGACG----- ---------- ---------- ---------- ---------- ---CG---AA CCCCGTGACC ACCCTTGTGC 
+CGCCTCCCAC CTGC------ ------CCCA GCAGAGGTGT ATGTGGACGT GAATG----- ---------- -----TAGGG 
+CC-CCGAAGT GTGACGGGCA GTTC------ -----AAGAA CCTCATGTGT CAGTAATTAA CACTGTGGAC ACC------- 
+---------- --TCCCATGA GGATATGATT CACGATGCCC AGATGGACTA CTATG----- -GCACCCGCC TGG----CAA 
+CCTGCTCCTC AGACAGGTCC GTCAAA---- ---------
+#Chelonia_mydas_FI276988               
+---------- -CTTTCATCG TAGGGACCCA TG--AAAGCA CCAGAAATAT GTATTACTGG TC-------- ---------- 
+---------- -TGAGCTT-- --------WA TTCTGCTTGC ACAGTATAAA TGTGATTAAG TCATGATCAC TTGTACTTAA 
+GYTATCACTA TTTTTTAGTT CTGTGATCAG TTCCTCTTT- ---------- ---------- ---------- ---------- 
+---------- -----ATCTG TTARTAGAAA GTTTAATAAA GA---ATTCC CSCAGGTTGA GTRCAACACT TTTTGAGTTA 
+GGAAATTGTC ATCTATAA-- ---------- -----TCTAT AATCAATTCC TTGAT--TAA ATGACAAAGA ATGTACTCAT 
+CCAGATGGCA TAGGTAGTAG CAATGCAGAG CTGATTGAGA GTGCTCAGAC TTACAGTACC CTGCTTAAAC TCCTGTATTT 
+CTTAC----- ---------- ---------- ---------- ---------- ---AA---AT GAAAAAAATT GTGTTATAAC 
+AACCTTGACT AGAT------ ---------A AATCTGGTGC ATCTGCGTTC CCAC------ ---------- -----CCAGC 
+AGCATCATGT GGGGTAGCAT CATTACCTCC CCCAGAACCC TTTCCTTATC TTTGAGGTAG CAGTGGTAG- ---------- 
+---------- ---------- ----ATGCTT CA-------- -----ACAGA CTATG----- -TGGCATCT- -------GGA 
+CTTCCTTTGT GCA------- ---------- ---------
+#Snake_plant_crown_rot_tissues_MN856150
+---TTACCGA GTTTACAACT CCCAAACCCC TG--TGAACA T--------- ----ACCACT TG-------- ---------- 
+---------- -TTGCCTCGG CGGATCAGCC CGCTCCCGGT AAAACGGGAC GGCCCGCCAG AGGACCCCT- ---------- 
+---------- -----AAACT CTGTTTCTAT ATGTA----- ---------- ---------- ---------- ---------- 
+---------- -----ACTTC TGAGTAAAAC CATAAATAAA TCAAAACTTT CAACAACGGA TCTCTTGGTT CTGGCATCGA 
+TGAAGAACGC AGCAAAAT-- -GCGATAAGT AATGTGAATT GCAGAATTCA GTGAA--TCA TCGAAT---- -------CTT 
+TGAACGCACA TTGCGCCCGC CAGTATTCTG GCGGGCATGC CTGTTCGAGC GTCA------ ---TTTCAAC CCTCAAGCAC 
+AGCTT----- ---------- ---------- ---------- ---------- ---GG----- ---------- -TGTTGGGAC 
+TCGCGTTAAT TCGC------ --GTTCCTCA AATTG----- --ATTGGCGG TCACG----- ---------- -----TCGAG 
+CTTCCATAGC GTAGTAGTAA AACCCTCGTT ACTGGTAATC GTCGCGGCCA CGCCGTTAAA CCCCA----- ---------- 
+---------- --ACTTCTGA ATGTTGACCT CG-------- -----GATCA GGTAG----- -GAATACCCG CTG----AAC 
+TTAAGCATAT TAATAAGCGG AG-------- ---------
+#Mus_musculus_JS564566                 
+---------- -TTAACTACA AGGAACCCCT AGTGATGGAG TTGGCCACTC CCTCTCTGCT GC-------- ---------- 
+---------- ---------- ---------- --CTCTTGGT GC-------- ---------- ---------- -------T-- 
+-------TTT GCCTATGGCC CCTATTCTGC CTGCTGAAGA CAC------- ---------- ---------- ---------- 
+---------- -----TCTTG CCAGCATGGA CTTAAACC-- CCTCCAGCTC TGACAATCCT CTTTCTTCTT TTGTTTTACA 
+TGAAGGGTCT GGCAGCCA-- ---------- ---------A AGCAATCACT CAAAGTTCAA ACCTTA---- -------TCT 
+ATTTTTTGCT TTGTTCCTCT TGGC------ ---------- ---------- ---------- ---CTTGGTT TTGTACATCA 
+GCTTT----- ---------- ---------- ---------- ---------- ---GA----- ---AAATACC ATCCCAGGGT 
+TAATGCTGGT TAAT------ TTATAACCAA GAGTGCTCTA GTTTGCAATA CAGGA----- ---------- -----CATGA 
+CTAATAAAAT AGGAAAG--A TGTTGTCTTT CTGAGAGATC TGTCTTCAGT CGTGGAGGAC GTACG----- ---------- 
+---------- ---------- ---------- ---------- -----TGGGA CTAAG----- -GTAAGTAG- ---------- 
+---------T ACGTAAGGTT AACGAAGGTA ACGTAA---
+#Jeotgalicoccus_halotolerans_KY967273  
+---------- ATTCGAGCAA CGCAAGACCC TTACCAAATC TTGACA---- ----TCCTCT GA-------- ---------- 
+---------- -CAGCCCTAG AGATAGGGTT TCCCTTCGGG GCAGAGTGAC GGGGGGTGCA TGG------- ---------- 
+-------TTG TCCTCAGCTC GTGTCGGGAG ATGTTGGGT- ---------- ---------- ---------- ---------- 
+---------- -----TAAGC CCCGCAACGA GCGCAACC-- ---------- ---------- CTTAAGTTTA GTTGCCATCA 
+TTAAGTTGGG CACTCTAG-- ---------- ---------- ACTGACTGCC GGAGA--CAA ACCGGA---- ---------- 
+---------- ---------- ---------- -------AGA AGGGGGGGAC AAC------- ---CTCAAAT CATCATGCCC 
+CTTAT----- ---------- ---------- ---------- ---------- ---GA----- ---------- ---TTTGGGC 
+TACACACGTG CTACAAGGGA CGGGTTACAA AGGGCAGCCA CCCCGCGAGG CCAAG----- ---------- -----CAAAT 
+CCCATAAAAC -------TGT TCTCAGTTCG GATTGGAGTC TGCAACTCCA CCCCATGAAG CTGGAA---- ---------- 
+---------- --TCGCTAGA AATCGAAAAT CA-------- -----GCATG CTACG----- -GAAAATAC- -------TTT 
+CCCGCCTTTT GCACACACCC CCCG------ ---------
+#Panthera_pardus_OQ132992              
+TAATAAACCT ATTTATCTTC TTTATACTCA CT-------- ---ACAATAT TTATTCTACT CC-------- ---------- 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+---------- -----TACCT ATCATTACAT CCAACACTCA ---------- ---------- ---------- ---------- 
+---------- -----ACTAT ACAAAAACAA CCTATACCCC CACTATGTAA AAACCACAAT CTCTTACGCC TTCACCATCA 
+GCATAATTCC GGCTATAATA TTCGTATCCT CCGGACAAGA AACAATTGTC TCAAA--CTG ACATTG---- -------ACT 
+ATCAA----- ---------- ---------- ---------- ---------- ---------- ---TTCAAAC CCTCAAATTG 
+TCACT----- ---------- ---------- ---------- ---------- ---AAGCTTT AAACTAGATT ATTTCTCGAT 
+CATCTTCATT CC-------- ---------- ---TGTAGCA CTTTTCGTTA CATGGTCGAT CA-------- -----TAGAA 
+TTCTCAATAT GGTACATACA CACAGACCCT TATATCAACC ------GATT CTTCAAGTAT CTCC------ ---------- 
+---------- ---------- --TCATATTT CT-------- -----AATTA CCATA----- -ATAATCCTA GTAACCGCCA 
+ATAACCTGTT CCAACTGTTT AA-------- ---------
+#Saurida_tumbil_OQ918222               
+TGGTGCATGA GCCGGCATAG TAGGCACTGC CC--TAAGCC TCTTAA---- ----TCCGTG CC-------- ---------- 
+---------- -GAACTTAGC CAACCAGGAG CCCTTTTAGG GGA------- ---------- ---------C GACCAAAT-- 
+-------TTA TAATGTAATT GTTACCGCAC ACGCCTTCGT AATAA----- ---------- ---------- ---------- 
+---------- -----TTTTC TTTATAGTAA TACCAATTAT GATCGGCGGA TTCGG--AAA CTGACTCATT CCCCTTATGA 
+TTGGGGCCCC CGATATGGCA TT-----TCC CCGTATAAAC AACATGAGCT TTTGA--CTC CTGCCC---- -------CCC 
+TCCTTCCTCT TACTTCTTGC CTCCTCTGGG GTTGAAGCCG GAGCCGGGAC CG-------- ---GATGAAC GGTTTACCCG 
+CCCCT----- ---------- ---------- ---------- ---------- ---GGCCGGT AACCTCGCCC ACGCCGGGGC 
+ATCTGTCGAT TTAACTATTT TTTCACTCCA CCTAGCAGGT ATCTCCTCTA TCCTGGGGGC CATTAACTTT ATTACTACAA 
+TCATTAACAT GAAGCCTCCC GCTATTTCAC AATATCAAAC CCCACTATTT GTTTGAGCAG TCCTAATTAC TGCCGTCCTC 
+CTTCTCCTCT CTCTCCCTGT TCTTGCAGCC GG-------- -----GATTA CTATGCTTCT TACAGATCGA AACCTCAACA 
+CCACCTTCTT CGACCCCGCG GGAGGGGGGG ACCCAATCC
+#Rattus_norvegicus_NM_001038992        
+---------- -GCTGGGCGC TGCGGTCCCG CGGAAGGGGG AGGCTAGGGT AAACTCCGCG TG-------- ---------- 
+---------- -GGGGCTTGT CTGCGACGTG GCGGAGTTCG GGAGCCTGAG GCCGGGTCAG AGCTGATCAG GAAGCATT-- 
+-------CGG AAGCCAAACC ATGGATCCAC CTGCCCGGAA AGAAAAATCC AAAGTTAAAG AACCTGCCTT CAGAGTGGAG 
+AAGGCTAAAC AGAAATCTGC CCAGCAGGAG CTGAAGCAAA GACAAAGAGC AGAG------ -------ATC TATGCTCTCA 
+ACAGAGTCAT GACGGAGC-- ---TGGAGCA GCAGCAGTTT GATGAGTTCT GTAAG--CAG ATGCAG---- -------CCC 
+CCCGGG--GA GTGAGCCAGC CTGCATCCCA GTCAGAGGGA CTGGGCCTTT GTCTGTGAGC TCATTCCCAC TGTTTCGCCG 
+CTGCCGCCGA GCTGGCCCAT TGGAGCCTTA CAGAACTGAT CAGGACTTGT GGAGACCTCT GCACTGAATT TCCTATAGGT 
+AACTTCCACC TCACTGGTTT TTACTCTCAA AACTGGCCCA GTGCTTGCTG G--------- ---------- -----GTAGA 
+CTTTTCATCT AGGACAGTGG ATTT--TTTC AAAAAGATCT TTTTTCTATT GTTTGAGAAA AATCATTGTT ---------- 
+---------- --TCTTGTGA AACTGTGTTT CT-------- -------TCC CTAAA----- -AATAATAAA ATACAAAAAT 
+GTTTGTCCTT GCAAAAAAAA AAAAAAAAAA AAAAAAAAA
