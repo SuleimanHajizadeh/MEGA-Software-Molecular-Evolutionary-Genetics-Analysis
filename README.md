@@ -1,186 +1,85 @@
-# MEGA-Software: Molecular Evolutionary Genetics Analysis  
-Complete documentation (including GPT YAML configuration, workflow details, scripts, repository structure, and MEGA usage).
+# 🧬 Molecular Evolutionary Genetics Analysis — MEGA12 & ITOL Pipeline
+
+[![MEGA](https://img.shields.io/badge/Tool-MEGA_12-darkgreen?style=flat-square)](https://www.megasoftware.net/)
+[![ITOL](https://img.shields.io/badge/Visualization-ITOL-blue?style=flat-square)](https://itol.embl.de/)
+[![Method](https://img.shields.io/badge/Method-Maximum_Likelihood_|_NJ_|_RelTime-orange?style=flat-square)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
+## 📌 Overview
+
+This repository contains datasets, alignments, analysis configurations (`.mao` templates), and workflow documentation for **molecular evolution and phylogenetics** analyses using **MEGA 12** and **ITOL (Interactive Tree of Life)**.
+
+Key analyses include phylogenetic reconstruction of the **COL1A1 gene** across multiple species, multi-sequence alignment pipelines, and molecular clock (RelTime) dating workflows.
 
 ---
 
-# 🧩 GPT Custom Configuration (YAML from MEGA-GPT)
-
-
-name: MEGA-GPT
-description: >
-  A customized GPT optimized for MEGA software workflows, phylogenetic
-  analysis, evolutionary genetics tasks, .mao templates, MEGA-CC automation,
-  codon/nucleotide model selection, and large-scale multi-gene phylogeny
-  pipelines.
-
-capabilities:
-  - sequence alignment guidance
-  - phylogenetic tree interpretation
-  - generating .mao templates
-  - megacc automation scripting
-  - workflow debugging
-  - reading PDF manuals and .docx FAQ files
-
-
----
-
-# 📌 Overview
-
-This repository contains example datasets, alignments, analysis files, and workflows for **MEGA (Molecular Evolutionary Genetics Analysis)** tools.
-
-It supports:
-
-* Multiple sequence alignment
-* Maximum Likelihood phylogenetics
-* Model testing
-* Bootstrap analysis
-* RelTime molecular dating
-* Automated batch processing with **MEGA-CC (`megacc`)**
-* Storing `.mao` reproducible analysis templates
-
-Author: **Suleiman Hajizadeh**
-Repository: [https://github.com/SuleimanHajizadeh/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis](https://github.com/SuleimanHajizadeh/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis)
-
----
-
-# 📁 Repository Structure
+## 🗂️ Repository Structure
 
 ```
 .
-├── MEGA_12/                 # Files related to MEGA version 12
-├── Mega(experience)/        # Example and test analyses
-├── TRO_Seq/                 # FASTA, MEG or aligned data
-├── README.md                # This documentation file
-```
-
-Recommended extension:
-
-```
-data/
-alignments/
-mao/
-scripts/
-results/
+├── MEGA_12/               # MEGA12 project files and analysis configs (.mao templates)
+├── Mega(experience)/      # Practice datasets and example phylogenetic analyses
+├── COL1A1/                # COL1A1 gene multi-species phylogenetics
+├── ITOL/                  # Tree visualization exports for ITOL
+├── ITOL Task 2/           # Extended ITOL annotation and styling
+├── TRO_Seq/               # Raw FASTA / aligned .meg sequence datasets
+├── alignment any animals/ # Cross-species multiple sequence alignments
+└── README.md
 ```
 
 ---
 
-# 🧬 MEGA Workflow
+## 🔬 Methodology
 
-## 1️⃣ Prepare and Align Sequences
+### Phylogenetic Pipeline
 
-* Store FASTA in `TRO_Seq/` or `data/`
-* Align using MEGA Alignment Explorer: MUSCLE / ClustalW
-* Export `.meg` alignment
+| Step | Tool | Method |
+|------|------|--------|
+| 1. Sequence retrieval | NCBI GenBank / UniProt | FASTA download |
+| 2. Multiple Sequence Alignment | MEGA12 — MUSCLE / ClustalW | Progressive alignment |
+| 3. Model selection | MEGA12 — BIC/AIC | Substitution model testing |
+| 4. Tree construction | MEGA12 | Maximum Likelihood + Bootstrap (1000×) |
+| 5. Molecular dating | MEGA12 — RelTime | Relative timetree estimation |
+| 6. Tree visualization | ITOL | Annotated, publication-ready trees |
 
----
+### COL1A1 Gene Analysis
 
-## 2️⃣ Create and Save MEGA Analysis Options (.mao)
-
-MEGA GUI → Phylogeny → Select ML / NJ / RelTime → Export Options → `.mao`
-
-Store them here:
-
-```
-mao/ml_nucleotide.mao
-mao/reltime.mao
-mao/bootstrap.mao
-```
+**COL1A1** (*Collagen, type I, alpha 1*) was selected as a model gene for cross-species phylogenetic comparison due to its evolutionary conservation and clinical relevance in connective tissue disorders. Multi-species alignment and ML tree reconstruction reveal deep evolutionary relationships and selective pressure signatures.
 
 ---
 
-## 3️⃣ Run Analyses with MEGA-CC (`megacc`)
+## ⚙️ MEGA-CC Automation
 
-### **Maximum Likelihood**
+Batch analyses can be executed with MEGA Command-line (MEGA-CC):
 
 ```bash
+# Maximum Likelihood tree
 megacc -a mao/ml_nucleotide.mao -d TRO_Seq/alignment.meg -o results/ml_output
-```
 
-### **RelTime Molecular Timetree**
-
-```bash
+# RelTime molecular clock
 megacc -a mao/reltime.mao -d TRO_Seq/alignment.meg -t input_tree.nwk -o results/timetree
 ```
 
-Outputs include:
+---
 
-* `*.nwk` tree files
-* `_summary.txt` likelihood reports
-* bootstrap replicates (if enabled)
+## 📊 Key Outputs
+
+- **Phylogenetic trees** (`.nwk` Newick format)
+- **ITOL-annotated tree exports** — publication-ready visualizations
+- **Bootstrap support values** — statistical confidence on tree topology
+- **RelTime chronograms** — divergence time estimates
+- **Model selection reports** — BIC scores and substitution parameters
 
 ---
 
-# 🗂 Recommended Full Folder Structure
+## 🎓 Academic Context
 
-```
-data/                    # Raw sequences
-alignments/              # Final .meg alignments
-mao/                     # .mao templates
-scripts/                 # automation scripts
-results/
-    ML/
-    RelTime/
-    Bootstraps/
-```
+This repository demonstrates proficiency in **molecular evolution** and **phylogenomics** — core competencies for computational biology research. The MEGA12 + ITOL workflow is standard in evolutionary biology publications.
 
----
-
-# ⚙️ Automation Script Example
-
-**scripts/run_ml.sh**
-
-```bash
-#!/bin/bash
-megacc -a mao/ml_nucleotide.mao -d alignments/input.meg -o results/ML
-echo "ML analysis completed."
-```
-
-Enable executable:
-
-```bash
-chmod +x scripts/run_ml.sh
-```
-
----
-
-# 🧠 Best Practices
-
-* Never overwrite original FASTA files
-* Keep `.mao` files for reproducibility
-* Document which MEGA version was used
-* Use clear file names:
-  `alignment_speciesX.meg`, `analysis_GTR+G.mao`, `ml_boot1000/`
-* Use folder-per-analysis organisation
-
----
-
-# 📌 Citation
-
-If you publish work using MEGA:
-
+**Citation:**
 > Tamura K., Stecher G., & Kumar S. MEGA X: Molecular Evolutionary Genetics Analysis across computing platforms. *Molecular Biology and Evolution.*
 
 ---
 
-# 🤝 Contributing
-
-You may contribute by:
-
-* Adding alignment examples
-* Uploading `.mao` templates
-* Adding MEGA-CC scripts
-* Improving documentation
-
----
-
-# 📜 License
-
-All user-generated files here are open and editable.
-MEGA software is licensed separately under the MEGA authors’ terms.
-
----
-
-# ✔️ End of README
-
-Thank you for using this repository!
+**Author:** Suleiman Hajizadeh | Bioinformatician @ IMBB, Azerbaijan
+📧 suleyman.hacizade1@gmail.com
