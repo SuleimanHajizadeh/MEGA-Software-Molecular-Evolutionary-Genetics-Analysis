@@ -1,336 +1,529 @@
 #!/usr/bin/env python3
 """
-Phylogenomics CLI Pipeline for COL1A1 Evolutionary Analysis
-Developed for Cambridge PhD Portfolio Upgrades
-Author: Suleyman Hajizadeh
-Date: June 1, 2026
+phylo_pipeline.py — Pure-Python Phylogenetic Distance Pipeline
+==============================================================
+Implements JC69 and Kimura 2-Parameter (K2P) evolutionary distance models
+from their mathematical definitions, followed by Neighbor-Joining (NJ) tree
+reconstruction — all without any phylogenetics library or MEGA GUI.
 
-This pipeline automates sequence retrieval, pairwise alignment, evolutionary
-distance estimation (Jukes-Cantor and Kimura 2-Parameter) from scratch,
-and phylogenetic reconstruction using the Neighbor-Joining (NJ) algorithm from scratch.
+Dependencies: biopython, numpy, matplotlib
+Usage:
+    python phylo_pipeline.py
+
+Output:
+    TRO_Seq/col1a1_nj_tree.png  —  Neighbour-Joining tree (matplotlib)
+
+Author : Suleyman Hajizadeh
+Purpose: Cambridge PhD portfolio — demonstrating mathematical implementation
+         of core phylogenetic algorithms
 """
 
 import os
-import sys
 import math
+import time
+import warnings
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from Bio import Entrez, SeqIO
 from Bio.Align import PairwiseAligner
-from Bio.Phylo.NewickIO import Parser
 
-# Set email for Entrez API compliance
+# ─────────────────────────────────────────────────────────────────────────────
+# CONFIGURATION
+# ─────────────────────────────────────────────────────────────────────────────
+
 Entrez.email = "suleyman.hacizade1@gmail.com"
 
-# Target COL1A1 accession numbers across 7 species
-SPECIES_MAP = {
-    "Homo_sapiens": "NM_000088.4",
-    "Pan_troglodytes": "XM_001170141.4",
-    "Mus_musculus": "NM_007742.4",
-    "Rattus_norvegicus": "NM_053304.1",
-    "Bos_taurus": "NM_174520.3",
-    "Gallus_gallus": "NM_204297.2",
-    "Danio_rerio": "NM_212864.2"
+# COL1A1 RefSeq accessions across 7 species
+ACCESSIONS = {
+    "Homo_sapiens":        "NM_000088",
+    "Pan_troglodytes":     "XM_016944896",
+    "Mus_musculus":        "NM_007742",
+    "Rattus_norvegicus":   "NM_053304",
+    "Gallus_gallus":       "NM_204775",
+    "Danio_rerio":         "NM_001004631",
+    "Xenopus_tropicalis":  "NM_001016853",
 }
 
-CACHE_DIR = "TRO_Seq"
-os.makedirs(CACHE_DIR, exist_ok=True)
+OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "TRO_Seq")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
-def download_sequences():
-    """Downloads target sequences from NCBI GenBank and caches them locally."""
-    sequences = {}
-    print("\n[1/5] Retrieving sequences from NCBI...")
-    for species, acc in SPECIES_MAP.items():
-        cache_path = os.path.join(CACHE_DIR, f"col1a1_{species}_{acc}.fasta")
-        if os.path.exists(cache_path):
-            print(f"  -> Loading cached sequence for {species} ({acc})")
-            record = SeqIO.read(cache_path, "fasta")
-        else:
-            print(f"  -> Downloading {species} ({acc}) from NCBI...")
-            try:
-                handle = Entrez.efetch(db="nuccore", id=acc, rettype="fasta", retmode="text")
-                record = SeqIO.read(handle, "fasta")
-                SeqIO.write(record, cache_path, "fasta")
-                handle.close()
-            except Exception as e:
-                print(f"  [!] Failed to download {acc}: {e}. Trying fallback to local dummy sequence.")
-                # Fallback to dummy sequence if network fails to guarantee script execution
-                from Bio.Seq import Seq
-                from Bio.SeqRecord import SeqRecord
-                record = SeqRecord(Seq("ATGGACGCGTACGT" * 100), id=acc, description=f"Fallback {species}")
-                SeqIO.write(record, cache_path, "fasta")
-        sequences[species] = str(record.seq).upper()
-    return sequences
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. SEQUENCE RETRIEVAL
+# ─────────────────────────────────────────────────────────────────────────────
 
-
-def perform_pairwise_alignments(sequences):
+def fetch_sequences(accessions: dict, rettype: str = "fasta") -> dict:
     """
-    Aligns all sequence pairs globally to compute raw nucleotide differences.
-    Returns alignment data containing length and mutational profile.
+    Retrieve nucleotide sequences from NCBI Entrez.
+
+    Parameters
+    ----------
+    accessions : dict
+        Mapping of species_name -> RefSeq accession string.
+    rettype : str
+        Entrez return type ('fasta' or 'gb').
+
+    Returns
+    -------
+    dict
+        Mapping of species_name -> Bio.SeqRecord object.
     """
-    print("\n[2/5] Running global pairwise alignments using PairwiseAligner...")
+    records = {}
+    for species, acc in accessions.items():
+        print(f"  Fetching {species} ({acc}) …")
+        try:
+            handle = Entrez.efetch(db="nucleotide", id=acc,
+                                   rettype=rettype, retmode="text")
+            record = SeqIO.read(handle, rettype)
+            handle.close()
+            records[species] = record
+            time.sleep(0.4)          # NCBI rate-limit courtesy pause
+        except Exception as exc:
+            warnings.warn(f"Could not fetch {acc}: {exc}")
+    return records
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. PAIRWISE ALIGNMENT
+# ─────────────────────────────────────────────────────────────────────────────
+
+def align_pair(seq_a: str, seq_b: str) -> tuple:
+    """
+    Perform global pairwise alignment of two nucleotide sequences.
+
+    Uses Biopython PairwiseAligner with standard DNA scoring:
+      match=1, mismatch=-1, open gap=-2, extend gap=-0.5.
+
+    Parameters
+    ----------
+    seq_a, seq_b : str
+        Nucleotide sequences as plain strings (ACGT).
+
+    Returns
+    -------
+    tuple of (str, str)
+        The top-scoring aligned sequences (gaps represented as '-').
+    """
     aligner = PairwiseAligner()
-    aligner.mode = 'global'
+    aligner.mode = "global"
     aligner.match_score = 1
     aligner.mismatch_score = -1
     aligner.open_gap_score = -2
-    aligner.extend_gap_score = -1
+    aligner.extend_gap_score = -0.5
+    alignments = aligner.align(seq_a, seq_b)
+    best = next(iter(alignments))
+    # Extract aligned strings
+    aligned_a = str(best).split("\n")[0]
+    aligned_b = str(best).split("\n")[2]
+    return aligned_a, aligned_b
 
-    species_list = list(sequences.keys())
-    n = len(species_list)
-    alignment_results = {}
+
+def compute_alignment_counts(aligned_a: str, aligned_b: str) -> dict:
+    """
+    Count substitution categories from a pairwise aligned sequence pair.
+
+    Classifies each aligned column into:
+      - match         : identical nucleotide
+      - transition P  : purine↔purine or pyrimidine↔pyrimidine (A↔G, C↔T)
+      - transversion Q: purine↔pyrimidine (A/G ↔ C/T)
+      - gap           : at least one '-'
+
+    Parameters
+    ----------
+    aligned_a, aligned_b : str
+        Gap-containing aligned sequences of equal length.
+
+    Returns
+    -------
+    dict with keys: n_sites, n_transitions (P), n_transversions (Q), p_frac, q_frac
+    """
+    purines = set("AG")
+    pyrimidines = set("CT")
+    n_match = n_P = n_Q = n_gap = 0
+
+    for a, b in zip(aligned_a, aligned_b):
+        if a == "-" or b == "-":
+            n_gap += 1
+            continue
+        if a == b:
+            n_match += 1
+        elif (a in purines and b in purines) or (a in pyrimidines and b in pyrimidines):
+            n_P += 1      # transition
+        else:
+            n_Q += 1      # transversion
+
+    n_sites = n_match + n_P + n_Q   # comparable sites only (no gaps)
+    p = n_P / n_sites if n_sites > 0 else 0.0
+    q = n_Q / n_sites if n_sites > 0 else 0.0
+    return dict(n_sites=n_sites, n_P=n_P, n_Q=n_Q, p=p, q=q)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. EVOLUTIONARY DISTANCE MODELS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def jc69_distance(p_total: float) -> float:
+    """
+    Jukes-Cantor 69 (JC69) evolutionary distance.
+
+    Assumes equal base frequencies and equal substitution rates across all
+    nucleotide pairs. The proportion of all differences (p = (P+Q)) feeds in.
+
+    Mathematical derivation
+    -----------------------
+    Under the JC69 model the probability of observing a difference at a site
+    after evolutionary time t is:
+
+        p(t) = 3/4 [1 - e^(-8/3 * μt)]
+
+    Inverting for d = μt gives:
+
+        d = -3/4 * ln(1 - 4/3 * p)
+
+    Parameters
+    ----------
+    p_total : float
+        Total proportion of differing sites (transitions + transversions).
+
+    Returns
+    -------
+    float
+        JC69 evolutionary distance (expected substitutions per site).
+        Returns np.inf if the argument of ln is non-positive.
+    """
+    arg = 1.0 - (4.0 / 3.0) * p_total
+    if arg <= 0:
+        return np.inf
+    return -0.75 * math.log(arg)
+
+
+def k2p_distance(p: float, q: float) -> float:
+    """
+    Kimura 2-Parameter (K2P) evolutionary distance.
+
+    Extends JC69 by using separate rates for transitions (κ·β) and
+    transversions (β), where κ is the transition/transversion ratio.
+
+    Mathematical derivation
+    -----------------------
+    Under K2P, the expected proportions of transitions (P) and transversions (Q)
+    at time t are:
+
+        P = 1/4 [1 - 2e^{-4(α+β)t} + e^{-8βt}]  (approx for α >> β)
+        Q = 1/2 [1 - e^{-8βt}]
+
+    Inverting both equations and combining gives:
+
+        d = -1/2 * ln(1 - 2P - Q) - 1/4 * ln(1 - 2Q)
+
+    This accounts for the known excess of transitions over transversions in
+    biological sequence data.
+
+    Parameters
+    ----------
+    p : float
+        Proportion of transition differences.
+    q : float
+        Proportion of transversion differences.
+
+    Returns
+    -------
+    float
+        K2P evolutionary distance. Returns np.inf if arguments of ln are ≤ 0.
+    """
+    w1 = 1.0 - 2.0 * p - q
+    w2 = 1.0 - 2.0 * q
+    if w1 <= 0 or w2 <= 0:
+        return np.inf
+    return -0.5 * math.log(w1) - 0.25 * math.log(w2)
+
+
+def build_distance_matrix(sequences: dict,
+                           model: str = "k2p") -> tuple:
+    """
+    Compute a pairwise evolutionary distance matrix for all sequence pairs.
+
+    Parameters
+    ----------
+    sequences : dict
+        species_name -> nucleotide string (str).
+    model : str
+        'jc69' or 'k2p'.
+
+    Returns
+    -------
+    (labels, matrix) where labels is a list of species names and
+    matrix is a numpy float array of shape (n, n).
+    """
+    labels = list(sequences.keys())
+    n = len(labels)
+    mat = np.zeros((n, n))
 
     for i in range(n):
         for j in range(i + 1, n):
-            sp1 = species_list[i]
-            sp2 = species_list[j]
-            seq1 = sequences[sp1]
-            seq2 = sequences[sp2]
+            sa = str(sequences[labels[i]].seq)
+            sb = str(sequences[labels[j]].seq)
+            # Trim to equal length if needed (simple suffix trim)
+            min_len = min(len(sa), len(sb))
+            sa, sb = sa[:min_len], sb[:min_len]
+            aa, ab = align_pair(sa, sb)
+            counts = compute_alignment_counts(aa, ab)
+            if model == "jc69":
+                d = jc69_distance(counts["p"] + counts["q"])
+            else:
+                d = k2p_distance(counts["p"], counts["q"])
+            mat[i, j] = mat[j, i] = d
 
-            # Standardizing length to prevent computational timeout during full 5kb alignment.
-            # We align a conserved coding region of 1000 bp for robust phylogenetics.
-            max_len = 1000
-            s1 = seq1[:max_len]
-            s2 = seq2[:max_len]
-
-            alignments = aligner.align(s1, s2)
-            best_alignment = alignments[0]
-            
-            # Extract aligned sequences with gaps
-            aligned_seqs = best_alignment.format().split('\n')
-            a1, a2 = aligned_seqs[0], aligned_seqs[2]
-            
-            alignment_results[(sp1, sp2)] = (a1, a2)
-            alignment_results[(sp2, sp1)] = (a2, a1)
-            print(f"  -> Aligned {sp1} vs {sp2} (Score: {best_alignment.score})")
-            
-    return alignment_results
+    return labels, mat
 
 
-def calculate_distances(alignment_results, species_list):
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. NEIGHBOR-JOINING ALGORITHM (pure NumPy, no phylogenetics library)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def neighbor_joining(labels: list, dist_matrix: np.ndarray) -> list:
     """
-    Calculates Jukes-Cantor (JC69) and Kimura 2-Parameter (K2P) distances from scratch.
+    Reconstruct a phylogenetic tree using the Neighbor-Joining algorithm.
+
+    Algorithm (Saitou & Nei, 1987)
+    --------------------------------
+    Given n taxa with distance matrix D (n×n):
+
+    1. Compute the Q-matrix:
+           Q[i,j] = (n-2)*D[i,j] - sum_k(D[i,k]) - sum_k(D[j,k])
+    2. Find the pair (i,j) minimising Q[i,j].
+    3. Compute branch lengths to new node u:
+           d(i,u) = D[i,j]/2 + (sum_k D[i,k] - sum_k D[j,k]) / (2*(n-2))
+           d(j,u) = D[i,j] - d(i,u)
+    4. Update D: for remaining taxa k,
+           D[u,k] = (D[i,k] + D[j,k] - D[i,j]) / 2
+    5. Remove i, j; add u. Repeat until 2 taxa remain.
+
+    Parameters
+    ----------
+    labels : list of str
+        Taxon names.
+    dist_matrix : np.ndarray, shape (n, n)
+        Symmetric pairwise distance matrix.
+
+    Returns
+    -------
+    list of tuples
+        Each tuple: (taxon_a, taxon_b, branch_length_a, branch_length_b)
+        describing one NJ join event.
     """
-    print("\n[3/5] Calculating evolutionary distance matrices from scratch...")
-    n = len(species_list)
-    jc_matrix = np.zeros((n, n))
-    k2p_matrix = np.zeros((n, n))
+    labels = list(labels)          # work on a copy
+    D = dist_matrix.copy().astype(float)
+    joins = []
 
-    purines = {'A', 'G'}
-    pyrimidines = {'C', 'T'}
+    while len(labels) > 2:
+        n = len(labels)
+        row_sums = D.sum(axis=1)
 
+        # Q-matrix
+        Q = np.full((n, n), np.inf)
+        for i in range(n):
+            for j in range(i + 1, n):
+                Q[i, j] = (n - 2) * D[i, j] - row_sums[i] - row_sums[j]
+                Q[j, i] = Q[i, j]
+
+        # Find minimum Q (off-diagonal)
+        np.fill_diagonal(Q, np.inf)
+        idx = np.unravel_index(np.argmin(Q), Q.shape)
+        i, j = int(idx[0]), int(idx[1])
+
+        # Branch lengths
+        d_ij = D[i, j]
+        if n > 2:
+            d_iu = d_ij / 2.0 + (row_sums[i] - row_sums[j]) / (2.0 * (n - 2))
+        else:
+            d_iu = d_ij / 2.0
+        d_ju = d_ij - d_iu
+
+        joins.append((labels[i], labels[j], max(d_iu, 0), max(d_ju, 0)))
+
+        # New node distances
+        new_label = f"({labels[i]},{labels[j]})"
+        new_dists = []
+        for k in range(n):
+            if k != i and k != j:
+                d_ku = (D[i, k] + D[j, k] - d_ij) / 2.0
+                new_dists.append(d_ku)
+
+        # Build reduced distance matrix
+        remaining = [k for k in range(n) if k != i and k != j]
+        m = len(remaining)
+        new_D = np.zeros((m + 1, m + 1))
+        for a, ri in enumerate(remaining):
+            for b, rj in enumerate(remaining):
+                new_D[a, b] = D[ri, rj]
+            new_D[a, m] = new_D[m, a] = new_dists[a]
+
+        D = new_D
+        labels = [labels[k] for k in remaining] + [new_label]
+
+    # Final pair
+    if len(labels) == 2:
+        joins.append((labels[0], labels[1], D[0, 1] / 2.0, D[0, 1] / 2.0))
+
+    return joins
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. TREE VISUALISATION
+# ─────────────────────────────────────────────────────────────────────────────
+
+def plot_nj_tree(joins: list, labels_orig: list, output_path: str,
+                 dist_matrix: np.ndarray) -> None:
+    """
+    Plot the Neighbor-Joining tree as a cladogram (matplotlib).
+
+    Renders a dendrogram-style figure with branch lengths proportional to
+    the K2P evolutionary distances, plus a heatmap of the pairwise distance
+    matrix for reference.
+
+    Parameters
+    ----------
+    joins : list
+        Output of neighbor_joining().
+    labels_orig : list
+        Original taxon labels.
+    output_path : str
+        File path for the saved PNG.
+    dist_matrix : np.ndarray
+        Pairwise K2P distance matrix for heatmap.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7),
+                             gridspec_kw={"width_ratios": [2, 1]})
+    fig.patch.set_facecolor("#0d1117")
+    for ax in axes:
+        ax.set_facecolor("#161b22")
+
+    # ── left: dendrogram (simplified ladder layout) ──
+    ax = axes[0]
+    y_positions = {sp: i for i, sp in enumerate(labels_orig)}
+    colors = plt.cm.tab10(np.linspace(0, 1, len(labels_orig)))
+    color_map = {sp: c for sp, c in zip(labels_orig, colors)}
+
+    current_y = len(labels_orig)
+    for join in joins:
+        a, b, d_a, d_b = join
+        # Leaf y from original; internal nodes get new index
+        ya = y_positions.get(a, current_y)
+        yb = y_positions.get(b, current_y + 1)
+        mid_y = (ya + yb) / 2.0
+
+        # Horizontal branch lines
+        x_a_start = 0 if a in labels_orig else 0.05
+        ax.plot([x_a_start, d_a], [ya, ya],
+                color=color_map.get(a, "white"), linewidth=2.5, solid_capstyle="round")
+        ax.plot([x_a_start, d_b], [yb, yb],
+                color=color_map.get(b, "white"), linewidth=2.5, solid_capstyle="round")
+        # Vertical connecting line
+        ax.plot([max(d_a, d_b), max(d_a, d_b)], [ya, yb],
+                color="#58a6ff", linewidth=1.5, linestyle="--", alpha=0.7)
+
+        new_label = f"({a},{b})"
+        y_positions[new_label] = mid_y
+        color_map[new_label] = "#58a6ff"
+        current_y += 1
+
+    # Species labels
+    for sp, y in [(s, y_positions[s]) for s in labels_orig]:
+        ax.text(0.001, y, sp.replace("_", " "), color=color_map[sp],
+                fontsize=9, va="center", fontstyle="italic",
+                fontfamily="DejaVu Sans")
+
+    ax.set_title("COL1A1 Neighbor-Joining Tree\n(K2P distances — implemented from scratch)",
+                 color="white", fontsize=13, pad=12)
+    ax.set_xlabel("K2P evolutionary distance (substitutions/site)", color="#8b949e")
+    ax.tick_params(colors="#8b949e")
+    for spine in ax.spines.values():
+        spine.set_edgecolor("#30363d")
+
+    # ── right: distance heatmap ──
+    ax2 = axes[1]
+    n = len(labels_orig)
+    clean_labels = [s.replace("_", " ") for s in labels_orig]
+    im = ax2.imshow(dist_matrix, cmap="magma_r", aspect="auto",
+                    vmin=0, vmax=np.nanmax(dist_matrix[np.isfinite(dist_matrix)]))
+    ax2.set_xticks(range(n))
+    ax2.set_yticks(range(n))
+    ax2.set_xticklabels(clean_labels, rotation=45, ha="right",
+                        color="#c9d1d9", fontsize=7.5, fontstyle="italic")
+    ax2.set_yticklabels(clean_labels, color="#c9d1d9",
+                        fontsize=7.5, fontstyle="italic")
     for i in range(n):
-        for j in range(i + 1, n):
-            sp1 = species_list[i]
-            sp2 = species_list[j]
-            a1, a2 = alignment_results[(sp1, sp2)]
+        for j in range(n):
+            val = dist_matrix[i, j]
+            ax2.text(j, i, f"{val:.3f}" if np.isfinite(val) else "∞",
+                     ha="center", va="center", fontsize=6.5,
+                     color="white" if val > 0.05 else "#0d1117")
+    cbar = fig.colorbar(im, ax=ax2, pad=0.04)
+    cbar.set_label("K2P distance", color="#8b949e")
+    cbar.ax.yaxis.set_tick_params(color="#8b949e")
+    plt.setp(cbar.ax.yaxis.get_ticklabels(), color="#8b949e")
+    ax2.set_title("Pairwise K2P Distance Matrix", color="white", fontsize=11, pad=10)
+    for spine in ax2.spines.values():
+        spine.set_edgecolor("#30363d")
 
-            total_sites = 0
-            mismatches = 0
-            transitions = 0
-            transversions = 0
-
-            for char1, char2 in zip(a1, a2):
-                if char1 == '-' or char2 == '-':
-                    continue  # Ignore gaps (pairwise deletion)
-                total_sites += 1
-                if char1 != char2:
-                    mismatches += 1
-                    # Check if transition or transversion
-                    is_pur_pair = char1 in purines and char2 in purines
-                    is_pyr_pair = char1 in pyrimidines and char2 in pyrimidines
-                    if is_pur_pair or is_pyr_pair:
-                        transitions += 1
-                    else:
-                        transversions += 1
-
-            if total_sites == 0:
-                print(f"  [!] Warning: Zero aligned sites for {sp1} vs {sp2}")
-                continue
-
-            # 1. Jukes-Cantor (JC69)
-            p = mismatches / total_sites
-            if p < 0.75:
-                d_jc = -0.75 * math.log(1.0 - (4.0 / 3.0) * p)
-            else:
-                d_jc = 3.0  # Cap distance if saturated
-
-            # 2. Kimura 2-Parameter (K2P)
-            P_ratio = transitions / total_sites
-            Q_ratio = transversions / total_sites
-            
-            # K2P formula terms
-            term1 = 1.0 - 2.0 * P_ratio - Q_ratio
-            term2 = 1.0 - 2.0 * Q_ratio
-
-            if term1 > 0 and term2 > 0:
-                d_k2p = -0.5 * math.log(term1) - 0.25 * math.log(term2)
-            else:
-                d_k2p = 4.0  # Cap distance if saturated
-
-            jc_matrix[i, j] = jc_matrix[j, i] = d_jc
-            k2p_matrix[i, j] = k2p_matrix[j, i] = d_k2p
-
-    return jc_matrix, k2p_matrix
+    fig.suptitle("COL1A1 Phylogenetic Analysis — Pure Python Implementation",
+                 color="#f0f6fc", fontsize=14, fontweight="bold", y=1.01)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=180, bbox_inches="tight",
+                facecolor=fig.get_facecolor())
+    print(f"  Tree saved: {output_path}")
+    plt.close(fig)
 
 
-def neighbor_joining(dist_matrix, taxa_names):
-    """
-    Implements the Neighbor-Joining (NJ) algorithm from scratch.
-    Returns Newick tree format string.
-    """
-    N = len(taxa_names)
-    # Keep track of active nodes and distance matrix
-    active_matrix = dist_matrix.copy()
-    nodes = [f"{name}" for name in taxa_names]
-
-    # Node mappings and branch lengths
-    while len(nodes) > 2:
-        num_active = len(nodes)
-        
-        # Calculate net divergence r_i
-        r = np.sum(active_matrix, axis=1)
-        
-        # Compute Q matrix
-        Q = np.zeros((num_active, num_active))
-        for i in range(num_active):
-            for j in range(num_active):
-                if i != j:
-                    Q[i, j] = (num_active - 2) * active_matrix[i, j] - r[i] - r[j]
-        
-        # Find minimum Q[i, j]
-        min_val = np.inf
-        u, v = -1, -1
-        for i in range(num_active):
-            for j in range(i + 1, num_active):
-                if Q[i, j] < min_val:
-                    min_val = Q[i, j]
-                    u, v = i, j
-                    
-        # Calculate branch lengths to new node
-        dist_uv = active_matrix[u, v]
-        d_u = 0.5 * dist_uv + (r[u] - r[v]) / (2.0 * (num_active - 2))
-        d_v = dist_uv - d_u
-        
-        # Create new node
-        new_node_name = f"({nodes[u]}:{d_u:.4f},{nodes[v]}:{d_v:.4f})"
-        
-        # Compute distances from new node to all other nodes
-        new_row = []
-        for k in range(num_active):
-            d_k = 0.5 * (active_matrix[u, k] + active_matrix[v, k] - dist_uv)
-            new_row.append(d_k)
-            
-        # Remove u and v from active matrix and add new node
-        # We delete v first, then u (accounting for index shifts)
-        indices_to_keep = [k for k in range(num_active) if k != u and k != v]
-        
-        # Reconstruct matrix
-        temp_matrix = active_matrix[indices_to_keep][:, indices_to_keep]
-        new_col = np.array([new_row[k] for k in indices_to_keep])
-        
-        # Append new column and row
-        temp_matrix = np.vstack([temp_matrix, new_col])
-        new_col_with_zero = np.append(new_col, 0.0)
-        active_matrix = np.column_stack([temp_matrix, new_col_with_zero])
-        
-        # Update node list
-        new_nodes = [nodes[k] for k in indices_to_keep]
-        new_nodes.append(new_node_name)
-        nodes = new_nodes
-
-    # Finally, link the last two remaining nodes
-    final_tree = f"({nodes[0]}:{active_matrix[0, 1]:.4f},{nodes[1]}:0.0000);"
-    return final_tree
-
-
-def plot_tree_beautiful(newick_str, output_path):
-    """Parses Newick string and plots a high-quality circular/rectangular tree via Matplotlib."""
-    try:
-        from io import StringIO
-        from Bio import Phylo
-        tree = Phylo.read(StringIO(newick_str), "newick")
-        
-        # Setup modern dark style plot
-        plt.style.use('dark_background')
-        fig = plt.figure(figsize=(10, 8), dpi=300)
-        ax = fig.add_subplot(1, 1, 1)
-        
-        # Draw the tree
-        Phylo.draw(tree, axes=ax, do_show=False, 
-                   label_func=lambda x: str(x.name).replace("_", " ") if x.name else "")
-        
-        # Customize aesthetic parameters
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_color('#10b981')
-        ax.spines['left'].set_color('#a855f7')
-        ax.tick_params(colors='#9ca3af')
-        ax.set_title("Reconstructed COL1A1 Neighbor-Joining Tree (Kimura 2-Parameter)", 
-                     color='#fbbf24', fontsize=12, fontweight='bold', pad=20)
-        ax.set_xlabel("Evolutionary Distance (Substitutions per Site)", color='#9ca3af', fontsize=10)
-        ax.set_ylabel("", color='#9ca3af')
-        
-        plt.tight_layout()
-        plt.savefig(output_path, facecolor='#030712', edgecolor='none')
-        plt.close()
-        print(f"  -> Reconstructed phylogenetic tree image saved to: {output_path}")
-    except Exception as e:
-        print(f"  [!] Failed to plot tree via Bio.Phylo: {e}")
-
+# ─────────────────────────────────────────────────────────────────────────────
+# MAIN PIPELINE
+# ─────────────────────────────────────────────────────────────────────────────
 
 def main():
-    print("=" * 70)
-    print("      COL1A1 Evolutionary Reconstruction & Phylogenetics Pipeline")
-    print("=" * 70)
-    
-    # 1. Download/load raw sequences
-    sequences = download_sequences()
-    species_list = list(sequences.keys())
-    
-    # 2. Align sequence pairs
-    alignment_results = perform_pairwise_alignments(sequences)
-    
-    # 3. Calculate distance matrices
-    jc_matrix, k2p_matrix = calculate_distances(alignment_results, species_list)
-    
-    # Print K2P distance matrix
-    print("\nCalculated Kimura 2-Parameter (K2P) Distance Matrix:")
-    header = "             " + "".join([f"{sp[:10]:>12}" for sp in species_list])
+    """Run the complete phylogenetic analysis pipeline."""
+    print("=" * 60)
+    print("COL1A1 Phylogenetic Pipeline")
+    print("Models: JC69 + K2P | Tree: Neighbour-Joining (pure Python)")
+    print("=" * 60)
+
+    # 1. Fetch sequences
+    print("\n[1/4] Fetching COL1A1 sequences from NCBI Entrez …")
+    seqs = fetch_sequences(ACCESSIONS)
+    if len(seqs) < 3:
+        raise RuntimeError("Too few sequences fetched — check internet/NCBI access.")
+    print(f"  Retrieved {len(seqs)} sequences.")
+
+    # 2. Build K2P distance matrix
+    print("\n[2/4] Computing pairwise K2P distances …")
+    labels, k2p_mat = build_distance_matrix(seqs, model="k2p")
+    print("  K2P Distance Matrix:")
+    header = f"{'':>22}" + "".join(f"{l[:8]:>10}" for l in labels)
     print(header)
-    for idx, sp in enumerate(species_list):
-        row = f"{sp[:10]:<12} " + "".join([f"{k2p_matrix[idx, k]:12.4f}" for k in range(len(species_list))])
+    for i, la in enumerate(labels):
+        row = f"{la[:22]:>22}" + "".join(f"{k2p_mat[i,j]:>10.4f}" for j in range(len(labels)))
         print(row)
-        
-    # 4. Construct tree using Neighbor-Joining
-    print("\n[4/5] Constructing Neighbor-Joining (NJ) tree...")
-    newick_tree = neighbor_joining(k2p_matrix, species_list)
-    print(f"  -> Reconstructed Newick Tree:\n     {newick_tree}")
-    
-    # Save Newick file
-    newick_path = os.path.join(CACHE_DIR, "col1a1_nj_k2p.nwk")
-    with open(newick_path, "w") as f:
-        f.write(newick_tree)
-    print(f"  -> Newick format file saved to: {newick_path}")
-    
-    # 5. Visualizations
-    print("\n[5/5] Visualizing phylogenetic results...")
-    img_output = os.path.join(CACHE_DIR, "col1a1_nj_tree.png")
-    plot_tree_beautiful(newick_tree, img_output)
-    
-    # Render ASCII Representation
-    print("\nASCII Representation of Reconstructed Tree:")
-    try:
-        from io import StringIO
-        from Bio import Phylo
-        tree = Phylo.read(StringIO(newick_tree), "newick")
-        Phylo.draw_ascii(tree)
-    except Exception as e:
-        print(f"  [!] Failed to render ASCII: {e}")
-        
-    print("\nPipeline execution completed successfully.")
-    print("=" * 70)
+
+    # 3. Also compute JC69 for comparison
+    print("\n[3/4] Computing pairwise JC69 distances (for comparison) …")
+    _, jc69_mat = build_distance_matrix(seqs, model="jc69")
+
+    # 4. NJ tree
+    print("\n[4/4] Building Neighbour-Joining tree …")
+    joins = neighbor_joining(labels, k2p_mat)
+    print("  NJ join sequence:")
+    for jn in joins:
+        print(f"    Joined: {jn[0][:30]} ↔ {jn[1][:30]}"
+              f"  (d={jn[2]:.5f}, {jn[3]:.5f})")
+
+    out_path = os.path.join(OUTPUT_DIR, "col1a1_nj_tree.png")
+    plot_nj_tree(joins, labels, out_path, k2p_mat)
+
+    print("\n✅  Pipeline complete.")
+    print(f"   Output: {out_path}")
 
 
 if __name__ == "__main__":
