@@ -14,7 +14,7 @@ Output:
     TRO_Seq/col1a1_nj_tree.png  —  Neighbour-Joining tree (matplotlib)
 
 Author : Suleyman Hajizadeh
-Purpose: Cambridge PhD portfolio — demonstrating mathematical implementation
+Purpose: Cambridge MPhil portfolio — demonstrating mathematical implementation
          of core phylogenetic algorithms
 """
 
