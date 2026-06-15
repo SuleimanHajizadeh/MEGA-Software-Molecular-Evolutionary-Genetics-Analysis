@@ -88,20 +88,34 @@ Best model: GTR+G+I
 
 ## ⚙️ Custom Python Phylogenetic CLI Pipeline (`phylo_pipeline.py`)
 
-To eliminate dependency on GUI-based software and demonstrate algorithmic coding proficiency, this repository includes a standalone Python-based phylogenetic pipeline that performs evolutionary reconstruction from scratch.
+To eliminate dependency on GUI-based software and demonstrate algorithmic coding proficiency, this repository includes a standalone Python-based phylogenetic pipeline that performs evolutionary reconstruction from scratch. It is engineered with robust logging, comprehensive CLI arguments, and unit tests.
 
-* **Path:** [`phylo_pipeline.py`](file:///bioinformatics/Github/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/phylo_pipeline.py)
-* **Execution:**
-  ```bash
-  python3 phylo_pipeline.py
-  ```
+*   **Path:** [`phylo_pipeline.py`](file:///home/suleimanhajizadeh/Documents/GitHub/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/phylo_pipeline.py)
+*   **Execution Options:**
+    ```bash
+    # Run using default settings (Kimura 2-Parameter, default Entrez email)
+    python3 phylo_pipeline.py
+
+    # Specify substitution model, customized output directory, and custom email for Entrez
+    python3 phylo_pipeline.py --model jc69 --email suleyman.hacizade1@gmail.com --output-dir results/
+    ```
 
 ### Key Implementation Details:
-1. **Automated Sequence Retrieval:** Fetches coding sequences for 7 vertebrate model species from NCBI GenBank programmatically via the `Biopython.Entrez` API and caches them locally in `TRO_Seq/`.
-2. **Pairwise Sequence Alignment:** Runs global pairwise alignments for all species using Biopython's `PairwiseAligner` to extract raw nucleotide differences.
-3. **From-Scratch Mathematical Modeling:** Calculates Jukes-Cantor (JC69) and Kimura 2-Parameter (K2P) distance matrices directly from raw counts of transitions ($P$) and transversions ($Q$) using NumPy.
-4. **From-Scratch Neighbor-Joining (NJ):** Reconstructs the phylogenetic tree topology and branch lengths using a custom-coded NJ clustering algorithm.
-5. **Aesthetic Output:** Exports the tree topology to a standard Newick file ([`col1a1_nj_k2p.nwk`](file:///bioinformatics/Github/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/TRO_Seq/col1a1_nj_k2p.nwk)), renders an ASCII cladogram in the console, and generates a dark-themed matplotlib plot ([`col1a1_nj_tree.png`](file:///bioinformatics/Github/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/TRO_Seq/col1a1_nj_tree.png)).
+1. **Command Line Interface (CLI):** Implements `argparse` for flexible execution settings (`--model`, `--email`, and `--output-dir`).
+2. **Production Logging:** Utilizes the standard Python `logging` module with a formatted console handler to monitor pipeline progress and troubleshoot API calls.
+3. **Automated Sequence Retrieval:** Fetches coding sequences for 7 vertebrate model species from NCBI GenBank programmatically via the `Biopython.Entrez` API and caches them locally.
+4. **Pairwise Sequence Alignment & Difference Matrix:** Performs alignment using `Bio.Align.PairwiseAligner` to isolate transition/transversion mutations.
+5. **Algorithmic Distance Models:** Implements Jukes-Cantor (JC69) and Kimura 2-Parameter (K2P) equations to construct evolutionary distance matrices using NumPy.
+6. **From-Scratch Neighbor-Joining (NJ):** Reconstructs Newick topology and computes branch lengths via custom NJ clustering.
+
+### 🧪 Unit Testing & Quality Assurance
+The pipeline's mathematical formulas and alignment counting are verified via an automated unit testing suite:
+*   **Test Suite:** [`test_phylo.py`](file:///home/suleimanhajizadeh/Documents/GitHub/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/test_phylo.py)
+*   **Execution Command:**
+    ```bash
+    python3 -m unittest test_phylo.py
+    ```
+*   **Coverage**: Verifies the correct behavior of distance calculations under high/low sequence divergence and checks the transition-transversion transition boundary conditions.
 
 ---
 
