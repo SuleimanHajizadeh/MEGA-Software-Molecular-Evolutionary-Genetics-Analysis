@@ -22,6 +22,8 @@ import os
 import math
 import time
 import warnings
+import logging
+import argparse
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -30,11 +32,22 @@ import matplotlib.patches as mpatches
 from Bio import Entrez, SeqIO
 from Bio.Align import PairwiseAligner
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("phylo_pipeline")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-Entrez.email = "suleyman.hacizade1@gmail.com"
+# Default NCBI email - can be overridden via CLI
+DEFAULT_EMAIL = "suleyman.hacizade1@gmail.com"
 
 # COL1A1 RefSeq accessions across 7 species
 ACCESSIONS = {
@@ -46,6 +59,7 @@ ACCESSIONS = {
     "Danio_rerio":         "NM_001004631",
     "Xenopus_tropicalis":  "NM_001016853",
 }
+
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "TRO_Seq")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -73,7 +87,7 @@ def fetch_sequences(accessions: dict, rettype: str = "fasta") -> dict:
     """
     records = {}
     for species, acc in accessions.items():
-        print(f"  Fetching {species} ({acc}) …")
+        logger.info(f"Fetching {species} ({acc}) …")
         try:
             handle = Entrez.efetch(db="nucleotide", id=acc,
                                    rettype=rettype, retmode="text")
@@ -82,7 +96,7 @@ def fetch_sequences(accessions: dict, rettype: str = "fasta") -> dict:
             records[species] = record
             time.sleep(0.4)          # NCBI rate-limit courtesy pause
         except Exception as exc:
-            warnings.warn(f"Could not fetch {acc}: {exc}")
+            logger.warning(f"Could not fetch {acc}: {exc}")
     return records
 
 
@@ -483,48 +497,154 @@ def plot_nj_tree(joins: list, labels_orig: list, output_path: str,
 # MAIN PIPELINE
 # ─────────────────────────────────────────────────────────────────────────────
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="COL1A1 Phylogenetic Pipeline - JC69 & K2P Evolutionary Distance Models"
+    )
+    parser.add_argument(
+        "--model",
+        choices=["k2p", "jc69"],
+        default="k2p",
+        help="Evolutionary distance model to use for tree building (default: k2p)"
+    )
+    parser.add_argument(
+        "--email",
+        default=DEFAULT_EMAIL,
+        help=f"NCBI Entrez email address (default: {DEFAULT_EMAIL})"
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=OUTPUT_DIR,
+        help=f"Output directory for saved figures (default: {OUTPUT_DIR})"
+    )
+    return parser.parse_args()
+
+
 def main():
     """Run the complete phylogenetic analysis pipeline."""
-    print("=" * 60)
-    print("COL1A1 Phylogenetic Pipeline")
-    print("Models: JC69 + K2P | Tree: Neighbour-Joining (pure Python)")
-    print("=" * 60)
+    args = parse_args()
+    Entrez.email = args.email
+
+    logger.info("=" * 60)
+    logger.info("COL1A1 Phylogenetic Pipeline")
+    logger.info(f"Model: {args.model.upper()} | Tree: Neighbour-Joining (pure Python)")
+    logger.info("=" * 60)
 
     # 1. Fetch sequences
-    print("\n[1/4] Fetching COL1A1 sequences from NCBI Entrez …")
+    logger.info("Step [1/4]: Fetching COL1A1 sequences from NCBI Entrez …")
     seqs = fetch_sequences(ACCESSIONS)
     if len(seqs) < 3:
         raise RuntimeError("Too few sequences fetched — check internet/NCBI access.")
-    print(f"  Retrieved {len(seqs)} sequences.")
+    logger.info(f"Retrieved {len(seqs)} sequences successfully.")
 
-    # 2. Build K2P distance matrix
-    print("\n[2/4] Computing pairwise K2P distances …")
-    labels, k2p_mat = build_distance_matrix(seqs, model="k2p")
-    print("  K2P Distance Matrix:")
+    # 2. Build distance matrix based on chosen model
+    logger.info(f"Step [2/4]: Computing pairwise {args.model.upper()} distances …")
+    labels, dist_mat = build_distance_matrix(seqs, model=args.model)
+    
+    logger.info(f"{args.model.upper()} Distance Matrix:")
     header = f"{'':>22}" + "".join(f"{l[:8]:>10}" for l in labels)
-    print(header)
+    logger.info(header)
     for i, la in enumerate(labels):
-        row = f"{la[:22]:>22}" + "".join(f"{k2p_mat[i,j]:>10.4f}" for j in range(len(labels)))
-        print(row)
+        row = f"{la[:22]:>22}" + "".join(f"{dist_mat[i,j]:>10.4f}" for j in range(len(labels)))
+        logger.info(row)
 
-    # 3. Also compute JC69 for comparison
-    print("\n[3/4] Computing pairwise JC69 distances (for comparison) …")
-    _, jc69_mat = build_distance_matrix(seqs, model="jc69")
+    # 3. Also compute the alternative model for comparison
+    alt_model = "jc69" if args.model == "k2p" else "k2p"
+    logger.info(f"Step [3/4]: Computing pairwise {alt_model.upper()} distances (for comparison) …")
+    _, alt_mat = build_distance_matrix(seqs, model=alt_model)
 
     # 4. NJ tree
-    print("\n[4/4] Building Neighbour-Joining tree …")
-    joins = neighbor_joining(labels, k2p_mat)
-    print("  NJ join sequence:")
+    logger.info("Step [4/4]: Building Neighbour-Joining tree …")
+    joins = neighbor_joining(labels, dist_mat)
+    logger.info("NJ join sequence:")
     for jn in joins:
-        print(f"    Joined: {jn[0][:30]} ↔ {jn[1][:30]}"
-              f"  (d={jn[2]:.5f}, {jn[3]:.5f})")
+        logger.info(f"  Joined: {jn[0][:30]} ↔ {jn[1][:30]} (d={jn[2]:.5f}, {jn[3]:.5f})")
 
-    out_path = os.path.join(OUTPUT_DIR, "col1a1_nj_tree.png")
-    plot_nj_tree(joins, labels, out_path, k2p_mat)
+    os.makedirs(args.output_dir, exist_ok=True)
+    out_path = os.path.join(args.output_dir, f"col1a1_nj_tree_{args.model}.png")
+    
+    # Save the output visualization
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7),
+                             gridspec_kw={"width_ratios": [2, 1]})
+    fig.patch.set_facecolor("#0d1117")
+    for ax in axes:
+        ax.set_facecolor("#161b22")
 
-    print("\n✅  Pipeline complete.")
-    print(f"   Output: {out_path}")
+    # left: dendrogram layout
+    ax = axes[0]
+    y_positions = {sp: i for i, sp in enumerate(labels)}
+    colors = plt.cm.tab10(np.linspace(0, 1, len(labels)))
+    color_map = {sp: c for sp, c in zip(labels, colors)}
+
+    current_y = len(labels)
+    for join in joins:
+        a, b, d_a, d_b = join
+        ya = y_positions.get(a, current_y)
+        yb = y_positions.get(b, current_y + 1)
+        mid_y = (ya + yb) / 2.0
+
+        x_a_start = 0 if a in labels else 0.05
+        ax.plot([x_a_start, d_a], [ya, ya],
+                color=color_map.get(a, "white"), linewidth=2.5, solid_capstyle="round")
+        ax.plot([x_a_start, d_b], [yb, yb],
+                color=color_map.get(b, "white"), linewidth=2.5, solid_capstyle="round")
+        ax.plot([max(d_a, d_b), max(d_a, d_b)], [ya, yb],
+                color="#58a6ff", linewidth=1.5, linestyle="--", alpha=0.7)
+
+        new_label = f"({a},{b})"
+        y_positions[new_label] = mid_y
+        color_map[new_label] = "#58a6ff"
+        current_y += 1
+
+    for sp, y in [(s, y_positions[s]) for s in labels]:
+        ax.text(0.001, y, sp.replace("_", " "), color=color_map[sp],
+                fontsize=9, va="center", fontstyle="italic",
+                fontfamily="DejaVu Sans")
+
+    ax.set_title(f"COL1A1 Neighbor-Joining Tree\n({args.model.upper()} distances — implemented from scratch)",
+                 color="white", fontsize=13, pad=12)
+    ax.set_xlabel(f"{args.model.upper()} evolutionary distance (substitutions/site)", color="#8b949e")
+    ax.tick_params(colors="#8b949e")
+    for spine in ax.spines.values():
+        spine.set_edgecolor("#30363d")
+
+    # right: distance heatmap
+    ax2 = axes[1]
+    n = len(labels)
+    clean_labels = [s.replace("_", " ") for s in labels]
+    im = ax2.imshow(dist_mat, cmap="magma_r", aspect="auto",
+                    vmin=0, vmax=np.nanmax(dist_mat[np.isfinite(dist_mat)]))
+    ax2.set_xticks(range(n))
+    ax2.set_yticks(range(n))
+    ax2.set_xticklabels(clean_labels, rotation=45, ha="right",
+                        color="#c9d1d9", fontsize=7.5, fontstyle="italic")
+    ax2.set_yticklabels(clean_labels, color="#c9d1d9",
+                        fontsize=7.5, fontstyle="italic")
+    for i in range(n):
+        for j in range(n):
+            val = dist_mat[i, j]
+            ax2.text(j, i, f"{val:.3f}" if np.isfinite(val) else "∞",
+                     ha="center", va="center", fontsize=6.5,
+                     color="white" if val > 0.05 else "#0d1117")
+    cbar = fig.colorbar(im, ax=ax2, pad=0.04)
+    cbar.set_label(f"{args.model.upper()} distance", color="#8b949e")
+    cbar.ax.yaxis.set_tick_params(color="#8b949e")
+    plt.setp(cbar.ax.yaxis.get_ticklabels(), color="#8b949e")
+    ax2.set_title(f"Pairwise {args.model.upper()} Distance Matrix", color="white", fontsize=11, pad=10)
+    for spine in ax2.spines.values():
+        spine.set_edgecolor("#30363d")
+
+    fig.suptitle(f"COL1A1 Phylogenetic Analysis — Pure Python ({args.model.upper()})",
+                 color="#f0f6fc", fontsize=14, fontweight="bold", y=1.01)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=180, bbox_inches="tight",
+                facecolor=fig.get_facecolor())
+    logger.info(f"Tree saved to output: {out_path}")
+    plt.close(fig)
+
+    logger.info("✅ Pipeline execution completed successfully.")
 
 
 if __name__ == "__main__":
     main()
+
