@@ -102,6 +102,44 @@ Best model: GTR+G+I
 
 ---
 
+## 🔬 Mathematical & Algorithmic Foundations
+
+Rather than relying on closed GUI buttons, this repository implements the core mathematical formulations of evolutionary distance metrics and phylogenetic reconstruction algorithms from scratch:
+
+### 1. Jukes-Cantor Model (JC69)
+The JC69 model assumes equal substitution rates ($\mu$) among all nucleotides and equal base frequencies ($\frac{1}{4}$). The evolutionary distance $d$ (expected substitutions per site) between two sequences is derived from the transition probability matrix:
+$$d_{JC} = -\frac{3}{4} \ln\left(1 - \frac{4}{3} p\right)$$
+where $p$ is the proportion of mismatching nucleotides across the aligned positions:
+$$p = \frac{\sum_{i=1}^{L} \mathbb{I}(S_{1,i} \neq S_{2,i})}{L}$$
+If $p \ge 0.75$, the formula diverges to infinity, indicating complete random saturation of mutations.
+
+---
+
+### 2. Kimura 2-Parameter Model (K2P)
+To account for different rates of transitions ($A \leftrightarrow G, C \leftrightarrow T$, rate $\alpha$) and transversions (purine $\leftrightarrow$ pyrimidine, rate $\beta$), the K2P model computes the distance as:
+$$d_{K2P} = -\frac{1}{2} \ln(1 - 2P - Q) - \frac{1}{4} \ln(1 - 2Q)$$
+where:
+* $P$ is the transition frequency: $P = \frac{\text{Transitions}}{L}$
+* $Q$ is the transversion frequency: $Q = \frac{\text{Transversions}}{L}$
+
+---
+
+### 3. Neighbor-Joining (NJ) Clustering Algorithm
+The Neighbor-Joining algorithm (Saitou & Nei, 1987) is a bottom-up clustering method that does not assume a molecular clock (producing unrooted trees). It operates through the following iterative steps:
+1. **Compute Net Divergence ($R_i$):** For each node $i$, calculate the sum of distances to all other $N$ active nodes:
+   $$R_i = \sum_{k=1}^{N} D_{ik}$$
+2. **Construct Rate-Corrected Distance Matrix ($M_{ij}$):** To identify the closest neighbors while correcting for long branches, compute:
+   $$M_{ij} = (N - 2) D_{ij} - R_i - R_j$$
+3. **Select Nodes to Join:** Find the pair $(i, j)$ that minimizes $M_{ij}$. Join them to create a new ancestral node $u$.
+4. **Compute Branch Lengths to Joined Nodes:**
+   $$S_{iu} = \frac{1}{2} D_{ij} + \frac{1}{2(N - 2)} (R_i - R_j)$$
+   $$S_{ju} = D_{ij} - S_{iu}$$
+5. **Update Distance Matrix:** For all remaining active nodes $k$, calculate the distance to the new node $u$:
+   $$D_{ku} = \frac{1}{2} (D_{ik} + D_{jk} - D_{ij})$$
+6. **Iterate:** Replace nodes $i$ and $j$ with the new node $u$ in the active node list ($N \leftarrow N - 1$). Repeat until only two nodes remain.
+
+---
+
 ## ⚙️ Standalone Python Phylogenetic CLI Pipeline (`scripts/phylo_pipeline.py`)
 
 To demonstrate algorithmic coding proficiency, this repository includes a standalone Python-based phylogenetic pipeline that performs evolutionary distance calculations and Neighbor-Joining reconstruction from scratch. It is engineered with robust logging, comprehensive CLI arguments, and unit tests.
