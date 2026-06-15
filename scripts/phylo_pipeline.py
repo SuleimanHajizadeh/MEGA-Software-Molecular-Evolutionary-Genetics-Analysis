@@ -61,7 +61,7 @@ ACCESSIONS = {
 }
 
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "TRO_Seq")
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results", "col1a1_analysis")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 

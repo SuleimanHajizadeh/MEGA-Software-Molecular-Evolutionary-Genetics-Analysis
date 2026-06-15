@@ -1,0 +1,19 @@
+# System files
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+env/
+.env/
+
+# Large alignment/checkpoint directories to ignore (if any)

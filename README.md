@@ -28,30 +28,46 @@ All sequences retrieved from NCBI GenBank. Below are the primary accession IDs u
 | *Gallus gallus* | Chicken | [NM_204297.2](https://www.ncbi.nlm.nih.gov/nuccore/NM_204297.2) | 5,480 bp |
 | *Danio rerio* | Zebrafish | [NM_212864.2](https://www.ncbi.nlm.nih.gov/nuccore/NM_212864.2) | 4,985 bp |
 
-> Sequences retrieved via NCBI Entrez (`Biopython.Entrez`) and aligned using **MUSCLE v3.8** embedded in MEGA12. All raw FASTA files stored in `TRO_Seq/`.
+> Sequences retrieved via NCBI Entrez (`Biopython.Entrez`) and aligned using **MUSCLE v3.8** embedded in MEGA12. All raw FASTA files are stored in `data/raw/col1a1_sequences/`.
 
 ---
 
 ## 🗂️ Repository Structure
 
+Adopted scientific best practices directory layout for reproducibility and clean codebase maintenance:
+
 ```
 MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/
-├── MEGA_12/               # MEGA12 project files and .mao analysis configuration templates
-│   ├── ml_nucleotide.mao  # Maximum Likelihood (GTR+G+I model) config
-│   └── reltime.mao        # RelTime molecular clock config
-├── Mega(experience)/      # Practice datasets and exploratory phylogenetic analyses
-├── COL1A1/                # COL1A1 gene multi-species phylogenetics (primary analysis)
-│   ├── col1a1_aligned.meg ← MUSCLE-aligned multi-species sequences
-│   ├── col1a1_ml_tree.nwk ← ML tree (GTR+Γ, 1000 bootstrap replicates)
-│   └── col1a1_timetree.nwk ← RelTime-dated chronogram
-├── ITOL/                  # Tree visualization exports (circular, rectangular)
-├── ITOL Task 2/           # Extended ITOL annotation with bootstrap + divergence times
-├── TRO_Seq/               # Raw FASTA + aligned .meg sequence datasets
-│   ├── col1a1_homo_NM_000088.4.fasta
-│   ├── col1a1_mus_NM_007742.4.fasta
-│   └── ...                # All 7 species FASTA files
-├── alignment any animals/ # Cross-species multiple sequence alignments (16S rRNA, COX1)
-└── README.md
+├── requirements.txt            # Python dependencies
+├── environment.yml             # Conda environment definition
+├── .gitignore                  # Git untracked pattern file
+├── LICENSE
+├── README.md
+│
+├── data/
+│   ├── raw/
+│   │   ├── col1a1_sequences/   # Raw FASTA sequences downloaded from NCBI GenBank
+│   │   └── animal_alignments/  # Additional cross-species alignments (16S rRNA, COX1)
+│   └── practice/
+│       ├── Mega_experience/    # Practice sequence alignments and testing data
+│       └── MEGA12_examples/    # MEGA12 native example files and trees
+│
+├── scripts/
+│   └── phylo_pipeline.py       # Standalone Python CLI phylogenetic matrix & NJ tree builder
+│
+├── tests/
+│   └── test_phylo.py           # Pytest/Unittest suite verifying JC69 & K2P distance math
+│
+├── results/
+│   ├── col1a1_analysis/        # Primary COL1A1 evolutionary output trees and alignments
+│   │   ├── col1a1_aligned.meg  # MUSCLE-aligned multi-species sequence data
+│   │   ├── col1a1_ml_tree.nwk  # ML tree (GTR+Γ, 1000 bootstrap replicates)
+│   │   └── col1a1_timetree.nwk # RelTime-dated chronogram
+│   └── itol_visualizations/    # Publication-ready circular and rectangular trees
+│
+└── docs/
+    ├── Megagenomics-Logo.png
+    └── DNT Günü - Bioinformatika - Genom Məlumatlarının (Big Data) Analizi və Kliniki İnterpretasiyası.pdf
 ```
 
 ---
@@ -86,34 +102,34 @@ Best model: GTR+G+I
 
 ---
 
-## ⚙️ Custom Python Phylogenetic CLI Pipeline (`phylo_pipeline.py`)
+## ⚙️ Standalone Python Phylogenetic CLI Pipeline (`scripts/phylo_pipeline.py`)
 
-To eliminate dependency on GUI-based software and demonstrate algorithmic coding proficiency, this repository includes a standalone Python-based phylogenetic pipeline that performs evolutionary reconstruction from scratch. It is engineered with robust logging, comprehensive CLI arguments, and unit tests.
+To demonstrate algorithmic coding proficiency, this repository includes a standalone Python-based phylogenetic pipeline that performs evolutionary distance calculations and Neighbor-Joining reconstruction from scratch. It is engineered with robust logging, comprehensive CLI arguments, and unit tests.
 
-*   **Path:** [`phylo_pipeline.py`](file:///home/suleimanhajizadeh/Documents/GitHub/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/phylo_pipeline.py)
-*   **Execution Options:**
+*   **Script Path:** [`scripts/phylo_pipeline.py`](./scripts/phylo_pipeline.py)
+*   **Execution Commands:**
     ```bash
     # Run using default settings (Kimura 2-Parameter, default Entrez email)
-    python3 phylo_pipeline.py
+    python3 scripts/phylo_pipeline.py
 
     # Specify substitution model, customized output directory, and custom email for Entrez
-    python3 phylo_pipeline.py --model jc69 --email suleyman.hacizade1@gmail.com --output-dir results/
+    python3 scripts/phylo_pipeline.py --model jc69 --email suleyman.hacizade1@gmail.com --output-dir results/col1a1_analysis/
     ```
 
 ### Key Implementation Details:
 1. **Command Line Interface (CLI):** Implements `argparse` for flexible execution settings (`--model`, `--email`, and `--output-dir`).
-2. **Production Logging:** Utilizes the standard Python `logging` module with a formatted console handler to monitor pipeline progress and troubleshoot API calls.
-3. **Automated Sequence Retrieval:** Fetches coding sequences for 7 vertebrate model species from NCBI GenBank programmatically via the `Biopython.Entrez` API and caches them locally.
+2. **Production Logging:** Utilizes the standard Python `logging` module with a formatted console handler to monitor pipeline progress.
+3. **Automated Sequence Retrieval:** Fetches coding sequences programmatically via the `Biopython.Entrez` API and caches them.
 4. **Pairwise Sequence Alignment & Difference Matrix:** Performs alignment using `Bio.Align.PairwiseAligner` to isolate transition/transversion mutations.
 5. **Algorithmic Distance Models:** Implements Jukes-Cantor (JC69) and Kimura 2-Parameter (K2P) equations to construct evolutionary distance matrices using NumPy.
 6. **From-Scratch Neighbor-Joining (NJ):** Reconstructs Newick topology and computes branch lengths via custom NJ clustering.
 
 ### 🧪 Unit Testing & Quality Assurance
 The pipeline's mathematical formulas and alignment counting are verified via an automated unit testing suite:
-*   **Test Suite:** [`test_phylo.py`](file:///home/suleimanhajizadeh/Documents/GitHub/MEGA-Software-Molecular-Evolutionary-Genetics-Analysis/test_phylo.py)
+*   **Test Suite:** [`tests/test_phylo.py`](./tests/test_phylo.py)
 *   **Execution Command:**
     ```bash
-    python3 -m unittest test_phylo.py
+    pytest tests/
     ```
 *   **Coverage**: Verifies the correct behavior of distance calculations under high/low sequence divergence and checks the transition-transversion transition boundary conditions.
 
@@ -125,16 +141,16 @@ Batch analyses using MEGA Command-line (MEGA-CC v12):
 
 ```bash
 # Maximum Likelihood tree (GTR+G+I, 1000 bootstrap replicates)
-megacc -a MEGA_12/ml_nucleotide.mao \
-       -d TRO_Seq/col1a1_aligned.meg \
-       -o results/col1a1_ml_tree
+megacc -a config/ml_nucleotide.mao \
+       -d results/col1a1_analysis/col1a1_aligned.meg \
+       -o results/col1a1_analysis/col1a1_ml_tree
 
 # RelTime molecular clock dating
-megacc -a MEGA_12/reltime.mao \
-       -d TRO_Seq/col1a1_aligned.meg \
-       -t results/col1a1_ml_tree.nwk \
+megacc -a config/reltime.mao \
+       -d results/col1a1_analysis/col1a1_aligned.meg \
+       -t results/col1a1_analysis/col1a1_ml_tree.nwk \
        -c calibrations.txt \
-       -o results/col1a1_timetree
+       -o results/col1a1_analysis/col1a1_timetree
 ```
 
 ### Sequence Retrieval via Biopython (reproducible)
@@ -147,7 +163,7 @@ accessions = ["NM_000088.4", "NM_007742.4", "NM_174520.3", "NM_212864.2"]
 for acc in accessions:
     handle = Entrez.efetch(db="nuccore", id=acc, rettype="fasta", retmode="text")
     record = SeqIO.read(handle, "fasta")
-    SeqIO.write(record, f"TRO_Seq/col1a1_{acc}.fasta", "fasta")
+    SeqIO.write(record, f"data/raw/col1a1_sequences/col1a1_{acc}.fasta", "fasta")
     print(f"Downloaded: {acc} — {len(record.seq)} bp")
 ```
 
@@ -159,7 +175,7 @@ for acc in accessions:
 |--------|-------------|
 | `col1a1_ml_tree.nwk` | Maximum Likelihood tree (1000 bootstrap) — all nodes ≥ 85% support |
 | `col1a1_timetree.nwk` | RelTime chronogram — Human-Mouse divergence: ~87 Mya (consistent with fossil record) |
-| ITOL exports | Annotated publication-ready circular trees with bootstrap values |
+| ITOL exports | Annotated circular trees with bootstrap values in `results/itol_visualizations/` |
 | Model report | GTR+G+I selected (BIC = 47,823.4); α = 0.412 |
 
 ### Evolutionary Insights
@@ -179,5 +195,5 @@ This repository demonstrates proficiency in **molecular evolution** and **phylog
 
 ---
 
-**Author:** Suleiman Hajizadeh | Bioinformatician @ IMBB, Azerbaijan
+**Author:** Suleiman Hajizadeh | Bioinformatician @ IMBB, Azerbaijan  
 📧 suleyman.hacizade1@gmail.com | 🔗 [GitHub Portfolio](https://github.com/SuleimanHajizadeh)

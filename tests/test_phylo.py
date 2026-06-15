@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts"))
+
 import unittest
 import numpy as np
 from phylo_pipeline import jc69_distance, k2p_distance, compute_alignment_counts
