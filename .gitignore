@@ -7,6 +7,7 @@ __pycache__/
 # IDEs and Editors
 .vscode/
 .idea/
+.obsidian/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
