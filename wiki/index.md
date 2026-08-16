@@ -10,6 +10,8 @@ Welcome to the central knowledge index. This catalog is automatically maintained
 | :--- | :--- | :--- |
 | [[COL1A1]] | Gene | Collagen Type I Alpha 1 chain; master structural marker across >450M yrs of vertebrate evolution. |
 | [[Homo_sapiens]] | Organism | Human terminal node and primate comparative reference genome. |
+| [[Danio_rerio]] | Organism | Zebrafish model organism; basal vertebrate teleost outgroup (~450 Mya divergence). |
+| [[Gallus_gallus]] | Organism | Chicken model organism; sauropsid/avian sister taxon to mammalian radiation (~310 Mya). |
 | [[MEGA12]] | Software | Molecular Evolutionary Genetics Analysis suite for alignment, model selection, ML/NJ trees, and RelTime. |
 | [[ITOL]] | Software | Interactive Tree Of Life web visualization and tree annotation platform. |
 
@@ -32,20 +34,23 @@ Welcome to the central knowledge index. This catalog is automatically maintained
 | Source | Type | Summary |
 | :--- | :--- | :--- |
 | [[COL1A1_Vertebrate_Phylogenetics_Dataset]] | Dataset | Multi-species GenBank dataset across 7 vertebrate taxa analyzed via MUSCLE, ML (GTR+G+I), and RelTime. |
+| [[Animal_Alignments_Dataset]] | Dataset | Multi-species 10-taxon animal alignment benchmark in native MEGA formats (`.meg`, `.mas`, `.mdsx`). |
 | [[Phylo_Pipeline_Script]] | Code / Script | Pure-Python standalone phylogenetic distance & NJ pipeline (`scripts/phylo_pipeline.py`) with unit tests. |
 
 ---
 
 ## 💡 Syntheses & Analyses
 
-*No syntheses added yet. Ask deep cross-cutting questions or request comparative studies to generate permanent synthesis pages.*
+| Synthesis | Category | Summary |
+| :--- | :--- | :--- |
+| [[Comparative_Phylogenetic_Frameworks]] | Analysis | Comparative evaluation of pure-Python NJ vs MEGA12 ML (GTR+G+I) and RelTime dating on COL1A1. |
 
 ---
 
 ## 📊 Maintenance & Graph Stats
-- **Total Entities**: 4
+- **Total Entities**: 6
 - **Total Concepts**: 5
-- **Total Sources**: 2
-- **Total Syntheses**: 0
+- **Total Sources**: 3
+- **Total Syntheses**: 1
 - **Last Ingest / Update**: 2026-08-17
 - **Changelog**: See [[log]]
