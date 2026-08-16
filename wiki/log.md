@@ -54,3 +54,16 @@ Chronological, append-only log of all operations performed on the wiki (ingestio
   - [[COL1A1]]: Linked all 8 vertebrate organism entities in the species accessions table.
   - [[index]]: Updated entities catalog, concepts, and maintenance statistics.
 - **Summary**: Completed knowledge graph expansion for all vertebrate species represented in the alignment datasets and documented MEGA analysis session file format specifications.
+
+## [2026-08-17] ingest | TRO_Seq, ITOL Visualizations, Practice Benchmarks & Clinical Presentation
+- **Created**:
+  - [[TRO_Seq_Dataset]]: Ingested 30-isolate vector-host dataset across sandflies, hyraxes, canines, and human isolates.
+  - [[ITOL_Visualizations]]: Documented SVG, PNG, PDF, and Newick tree exports.
+  - [[MEGA12_Benchmark_Suite]]: Documented calibration practice benchmarks (RTDT dated tips, mtCDNA, Chloroplast).
+  - [[Clinical_Bioinformatics_Presentation]]: Documented World DNA Day genomic big data & ACMG variant interpretation presentation.
+  - [[Phlebotomus_sergenti]]: Sandfly vector entity.
+  - [[Trypanosomatida]]: Kinetoplastid pathogen order entity.
+  - [[Vector_Host_Phylodynamics]]: Methodological concept tracking transmission networks.
+- **Updated**:
+  - [[index]]: Updated catalog with all 13 entities, 7 concepts, 7 sources, and 1 synthesis.
+- **Summary**: Completed 100% full repository documentation coverage across all datasets, outputs, code, and presentations into the LLM Wiki.
