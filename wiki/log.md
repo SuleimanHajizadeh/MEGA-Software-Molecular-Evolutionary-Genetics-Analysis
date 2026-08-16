@@ -41,3 +41,16 @@ Chronological, append-only log of all operations performed on the wiki (ingestio
 - **Created**: [[Comparative_Phylogenetic_Frameworks]]
 - **Updated**: [[index]]
 - **Summary**: Synthesized algorithmic vs maximum-likelihood trade-offs, structural purifying selection on the COL1A1 locus ($I = 0.318$), transition bias ($\kappa = 2.84$), and divergence timing across the vertebrate tree.
+
+## [2026-08-17] ingest | Vertebrate Taxa Entities & MEGA File Format Specifications
+- **Created**:
+  - [[Pan_troglodytes]]: Primate chimpanzee reference node (~6–7 Mya).
+  - [[Mus_musculus]]: Mouse model organism entity.
+  - [[Rattus_norvegicus]]: Rat model organism entity.
+  - [[Bos_taurus]]: Bovine Laurasiatherian calibration node (~87.5 Mya).
+  - [[Xenopus_tropicalis]]: Amphibian anamniote bridge node (~350 Mya).
+  - [[MEGA_File_Formats]]: Structural specification of `.meg`, `.mas`, `.mdsx`, `.mtsx`, and `.mao` formats.
+- **Updated**:
+  - [[COL1A1]]: Linked all 8 vertebrate organism entities in the species accessions table.
+  - [[index]]: Updated entities catalog, concepts, and maintenance statistics.
+- **Summary**: Completed knowledge graph expansion for all vertebrate species represented in the alignment datasets and documented MEGA analysis session file format specifications.
