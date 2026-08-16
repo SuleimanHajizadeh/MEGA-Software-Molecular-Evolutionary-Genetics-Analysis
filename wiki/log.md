@@ -16,3 +16,15 @@ Chronological, append-only log of all operations performed on the wiki (ingestio
   - [[Molecular_Clock_RelTime]]: RelTime relative dating concept page.
   - [[COL1A1_Vertebrate_Phylogenetics_Dataset]]: Initial repository dataset source page.
 - **Summary**: Seeded foundational knowledge graph nodes from the repository's molecular evolutionary genetics and phylogenetics pipeline.
+
+## [2026-08-17] ingest | Pure-Python Phylogenetic Pipeline (scripts/phylo_pipeline.py)
+- **Source**: `scripts/phylo_pipeline.py` & `tests/test_phylo.py`
+- **Created**:
+  - [[Phylo_Pipeline_Script]]: Source documentation for standalone pipeline CLI, architecture, and verification.
+  - [[Neighbor_Joining_Algorithm]]: Mathematical formulation of Saitou & Nei (1987) $Q$-matrix and branch length estimation.
+  - [[Pairwise_Evolutionary_Distance]]: Analytical derivations of JC69 and K2P distance models.
+- **Updated**:
+  - [[Substitution_Models]]: Cross-referenced mathematical derivations and unit test benchmarks.
+  - [[Phylogenetic_Reconstruction]]: Linked algorithmic distance methods and workflow steps.
+  - [[index]]: Updated concept/source tables and graph metrics.
+- **Summary**: Ingested pure-Python implementation of JC69, K2P, and Neighbor-Joining tree construction, extracting mathematical equations, code structures, and test assertions into the knowledge graph.
